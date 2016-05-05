@@ -1,3 +1,5 @@
+
+
 public class Node 
 {
 	public static char nullCharacter = '@';
@@ -25,7 +27,23 @@ public class Node
 	
 	public Node(String nodeString)
 	{
+		keys = new char[26];
+		for (int x = 0; x < 26; x++)
+			keys[x] = '@';
 		this.nodeString = nodeString.toUpperCase();
+		isLeaf = true;
+	}
+	
+	public int countKeys()
+	{
+		int count = 0;
+		if (keys != null)
+		{
+			for (int x = 0;  x < 26; x++)
+			if (keys[x] != nullCharacter)
+				count++;
+		}
+		return count;
 	}
 	
 	public char keyAt(char inputChar)
@@ -37,30 +55,45 @@ public class Node
 	
 	public String toString()
 	{
-		if (keys == null)
-		{
-			return "This is string : " + nodeString;
-		}
 		
 		String stringRepresentation = "";
 		if (endOfWord)
 		{
-			stringRepresentation+="[#]";
+			stringRepresentation += "[#]";
 		}
 		
 		for (int x = 0; x < 26; x++)
 		{
-			if (keys[x] != nullCharacter)
-				stringRepresentation += "[" + keys[x] + "]";
+//			if (keys[x] != nullCharacter)
+//			{
+				stringRepresentation = stringRepresentation + ("[" +  keys[x] + "]");
+//			}
+		}
+		
+		if (nodeString != null)
+		{
+			stringRepresentation = "This is string : " + nodeString;
 		}
 		return stringRepresentation;
 	}
 	
 	//Test if a node is a leaf
 	
+	
+	public void initializeChildren()
+	{
+		isLeaf = false;
+		children = new Node[26];
+	}
+	
 	public String getString()
 	{
 		return nodeString;
+	}
+	
+	public void setString(String nodeString)
+	{
+		this.nodeString = nodeString;
 	}
 	
 	public boolean pointsToString(char input)
@@ -71,7 +104,7 @@ public class Node
 		}
 		else 
 		{
-			return children[(int)input-(int)'A'].isString();
+			return children[input-'A'].isLeaf;
 		}
 	}
 	

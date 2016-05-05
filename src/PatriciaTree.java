@@ -1,5 +1,3 @@
-import javax.swing.JComboBox.KeySelectionManager;
-
 /*
 Name and Surname:  Regan Koopmans
 Student/staff Number: 15043143
@@ -21,13 +19,11 @@ public class PatriciaTree
 		/*You may add any initialization which your
 		require for your trie here.  Your default constructor
 		will be used to create your tree for marking*/
-		
-		
 	}
 	
 	public void collapsePrefix()
 	{
-		System.out.println("Compressing prefix");
+		//System.out.println("Compressing prefix");
 	}
 	
 	public int convertToIndex(char input)
@@ -46,9 +42,11 @@ public class PatriciaTree
 		
 		if (root == null)
 		{
+			System.out.println("Root null case");
 			root = new Node();
 			root.children[word.charAt(0)-'A'] = new Node(word);
 			root.keys[word.charAt(0)-'A'] = word.charAt(0);
+			
 			return true;
 		}
 		else 
@@ -56,36 +54,78 @@ public class PatriciaTree
 			//Search node to insert into
 			Node p = root;
 			int wordIndex = 0;
-			while (!p.pointsToString(word.charAt(wordIndex)) && wordIndex < word.length() && p.keys[(word.charAt(wordIndex))-'A'] != nullCharacter)
+
+			while (p.children[(word.charAt(wordIndex))-'A'] != null &&  !p.children[(word.charAt(wordIndex))-'A'].isLeaf && wordIndex < word.length() && p.keys[(word.charAt(wordIndex))-'A'] != nullCharacter)
 			{
+				System.out.println("iterate");
 				p = p.children[convertToIndex(word.charAt(wordIndex))];
-				System.out.println("String : " + p.getString());
 				wordIndex++; 
 			}
 			
-			if (p.keys != null && wordIndex < word.length() && p.keyAt(word.charAt(wordIndex)) == nullCharacter)
+			
+			if (wordIndex < word.length() && p.keys[word.charAt(wordIndex)-'A'] == nullCharacter)
 			{
-//				p.addWordLiteral(wordIndex,word);
-
+				System.out.println("Case 1");
 				p.children[(int)(word.charAt(wordIndex)-'A')] = new Node(word);
 				p.keys[word.charAt(wordIndex)-'A'] = word.charAt(wordIndex);
+				
 			}
-			else if (p.keys != null && wordIndex == word.length() -1)
+			else if (!p.isLeaf && wordIndex == word.length() -1)
 			{
-				p.endOfWord = true;
+				System.out.println("Case 2");
+						
+				p.children[word.charAt(wordIndex)-'A'] = new Node(word);
+				p.keys[word.charAt(wordIndex)-'A'] = word.charAt(wordIndex);
+
 			}
 			else 
 			{
+				System.out.println("Case 3");
 				String currentString = p.children[word.charAt(wordIndex)-'A'].getString();
-				System.out.println(currentString);
+				//System.out.println(currentString);
 				
-				
-				
-				while (word.charAt(wordIndex) == currentString.charAt(wordIndex))
+				while (p.children != null && wordIndex < word.length() && wordIndex <currentString.length() && word.charAt(wordIndex) == currentString.charAt(wordIndex))
 				{
-					System.out.println(word.charAt(wordIndex));
+
+					if (p.keys[word.charAt(wordIndex)-'A'] == '@')
+					{
+						System.out.println("Creating node");
+						Node newNode = new Node();
+						p.children[word.charAt(wordIndex)-'A'] = newNode;
+						p.keys[word.charAt(wordIndex)-'A'] = word.charAt(wordIndex);
+						p = newNode;
+					}
+					else
+					{
+						System.out.println("Skipping to next");
+						if (!p.children[word.charAt(wordIndex)-'A'].isLeaf)
+						p = p.children[word.charAt(wordIndex)-'A'];
+					}
 					wordIndex++;
 				}
+				
+				Node separatingNode = new Node();
+				
+				separatingNode.children[word.charAt(wordIndex)-'A'] = new Node(word);
+				separatingNode.keys[word.charAt(wordIndex)-'A'] = word.charAt(wordIndex);
+				separatingNode.isLeaf = false;
+				
+				if (wordIndex < currentString.length())
+				{
+					separatingNode.children[currentString.charAt(wordIndex)-'A'] = new Node(currentString);
+					separatingNode.keys[currentString.charAt(wordIndex)-'A'] = currentString.charAt(wordIndex);
+				}
+				else
+				{
+					//separatingNode.endOfWord = true;
+					separatingNode.setString(currentString);
+				}
+				if (p.children == null)
+					p.initializeChildren();
+				p.setString(null);
+				//p = separatingNode;
+				p.children[(word.charAt(wordIndex-1))-'A'] = separatingNode;
+				//p.keys[word.charAt(wordIndex-1)-'A'] = word.charAt(wordIndex-1);
 			}
 		}
 		collapsePrefix();
@@ -114,9 +154,7 @@ public class PatriciaTree
 	public String remove(String word)
 	{
 		/*Deletes the word passed as a parameter from the tree.
-		If the tree was empty, then return an exclamation mark.*/
-		
-		
+		If the tree was empty, then return an exclamation mark.*/	
 		return "";
 	}
 	
@@ -128,5 +166,9 @@ public class PatriciaTree
 	public void printTree(Node node)
 	{
 		System.out.println(node);
+		
+		for (int x= 0; x < 26; x++)
+			if (node.children != null && node.children[x] != null)
+				printTree(node.children[x]);
 	}
 }
